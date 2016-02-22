@@ -10,11 +10,36 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
+    <string name="permission_rationale">"Contacts permissions are needed for
+        providing email
         completions."
     </string>
-    <string name="error_email_taken">This email address is already in use</string>
+    <string name="error_email_taken">This email address is already in use
+    </string>
     <string name="error_network">There was a network Error</string>
-    <string name="firebase_root">https://sweltering-heat-908.firebaseIO.com</string>
-    <string name="display_name_too_short">Display must be at least 4 characters</string>
+    <string name="firebase_root">https://sweltering-heat-908.firebaseIO.com
+    </string>
+    <string name="display_name_too_short">Display must be at least 4
+        characters
+    </string>
+    <string name="welcome">Welcome to InstaClone :)</string>
+    <string name="tell_me_more">Please tell us a little about yourself.</string>
+    <string name="have_fun">Have fun sharing moments with your friends!</string>
+    <string name="title_activity_navigation_drawer">NavigationDrawerActivity
+    </string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string-array name="nav_drawer_items">
+        <item>Profile</item>
+        <item>Friends</item>
+        <item>Images</item>
+        <item>Messages</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

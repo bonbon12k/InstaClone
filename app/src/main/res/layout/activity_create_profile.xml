@@ -42,7 +42,8 @@
                     android:id="@+id/FirstName"
                     android:layout_gravity="center_horizontal"
                     android:minWidth="200dp"
-                    android:hint="First Name" />
+                    android:hint="First Name" android:singleLine="true"
+                    android:lines="1"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -54,7 +55,8 @@
                     android:id="@+id/LastName"
                     android:layout_gravity="center_horizontal"
                     android:minWidth="200dp"
-                    android:hint="Last Name" />
+                    android:hint="Last Name" android:singleLine="true"
+                    android:lines="1"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -67,7 +69,8 @@
                     android:id="@+id/DisplayName"
                     android:layout_gravity="center_horizontal"
                     android:minWidth="200dp"
-                    android:hint="Display Name*" />
+                    android:hint="Display Name*" android:singleLine="true"
+                    android:lines="1"/>
             </android.support.design.widget.TextInputLayout>
 
             <TextView

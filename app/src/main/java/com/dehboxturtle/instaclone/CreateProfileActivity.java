@@ -1,30 +1,21 @@
 package com.dehboxturtle.instaclone;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextSwitcher;
-import android.widget.TextView;
-import android.widget.ViewSwitcher;
+import android.widget.*;
+import com.firebase.client.*;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CreateProfileActivity extends AppCompatActivity {
 
@@ -36,6 +27,7 @@ public class CreateProfileActivity extends AppCompatActivity {
     LinearLayout Profile;
     TextSwitcher mGuide;
     Button mInputButton;
+    Handler scheduler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +39,7 @@ public class CreateProfileActivity extends AppCompatActivity {
         mGuide = (TextSwitcher) findViewById(R.id.ProfileGuide);
         mInputButton = (Button) findViewById(R.id.inputButton);
         Profile = (LinearLayout) findViewById(R.id.ProfileInfo);
-        Handler scheduler = new Handler();
+        scheduler = new Handler();
 
         // initialize the guide to animate text changing with fading
         mGuide.setFactory(new ViewSwitcher.ViewFactory() {
@@ -72,9 +64,9 @@ public class CreateProfileActivity extends AppCompatActivity {
         mGuide.setOutAnimation(this, android.R.anim.slide_out_right);
 
         // set guide initial text
-        scheduler.postDelayed(new AnimateText("Welcome to InstaClone :)"), 500);
+        scheduler.postDelayed(new AnimateText(getString(R.string.welcome)), 500);
 
-        scheduler.postDelayed(new AnimateTextWithInput("Please tell us a little about yourself"), 2500);
+        scheduler.postDelayed(new AnimateTextWithInput(getString(R.string.tell_me_more)), 2500);
 
         // get the firebase root and make sure user is still logged in
         mFirebaseRef = new Firebase(getString(R.string.firebase_root));
@@ -105,13 +97,30 @@ public class CreateProfileActivity extends AppCompatActivity {
 
     public void getInput(View view) {
         String dname = DisplayName.getText().toString();
-
+        String first = FirstName.getText().toString();
+        String last = LastName.getText().toString();
         // Check for a valid DisplayName
         if (dname.length() < 4) {
             DisplayName.setError(getString(R.string.display_name_too_short));
             DisplayName.requestFocus();
+            return;
         }
 
+        Map<String, Object> value = new HashMap<>();
+        value.put("display_name", dname);
+        value.put("first_name", first);
+        value.put("last_name", last);
+
+        mFirebaseRef.child("users/" + uid).updateChildren(value);
+        scheduler.post(new AnimateTextRemoveInput("Thanks " + dname + "."));
+        scheduler.postDelayed(new AnimateText(getString(R.string.have_fun)), 1500);
+        scheduler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                startActivity(intent);
+            }
+        }, 3000);
     }
 
     public class AnimateText implements Runnable {
@@ -178,6 +187,46 @@ public class CreateProfileActivity extends AppCompatActivity {
                 Profile.setVisibility(View.VISIBLE);
                 mGuide.setText(text);
                 mInputButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    public class AnimateTextRemoveInput implements Runnable {
+        AnimateAsyncRemoveInput anim;
+
+        public AnimateTextRemoveInput(String text) {
+            anim = new AnimateAsyncRemoveInput(text);
+        }
+
+        @Override
+        public void run() {
+            anim.execute();
+        }
+
+        private class AnimateAsyncRemoveInput extends AsyncTask<Void, Void, Void> {
+            String text;
+
+            public AnimateAsyncRemoveInput(String text) {
+                super();
+                this.text = text;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                Profile.setVisibility(View.INVISIBLE);
+                mInputButton.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                mGuide.setText(text);
             }
         }
     }
