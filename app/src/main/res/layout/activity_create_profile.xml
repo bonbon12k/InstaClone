@@ -70,6 +70,15 @@
                     android:hint="Display Name*" />
             </android.support.design.widget.TextInputLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="*required"
+                android:id="@+id/textView2"
+                android:textSize="10dp"
+                android:layout_gravity="center_horizontal" />
+
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,6 +87,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="10dp"
                 android:onClick="getInput" />
+
         </LinearLayout>
     </LinearLayout>
 
