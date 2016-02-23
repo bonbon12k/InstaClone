@@ -26,7 +26,6 @@ import android.widget.*;
 import com.firebase.client.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -349,11 +348,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         public void onAuthenticated(AuthData authData) {
             Log.i("Firebase", "logged in " + mEmail);
-            Map<String, Object> data = new HashMap<>();
-            data.put("provider", authData.getProvider());
             uid = authData.getUid();
             Log.i("uid", uid);
-            mFirebaseRef.child("users/" + uid).updateChildren(data);
+            mFirebaseRef.child("users/" + uid);
             latch.countDown();
         }
 

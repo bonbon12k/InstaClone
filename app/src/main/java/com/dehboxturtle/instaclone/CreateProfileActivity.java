@@ -108,8 +108,6 @@ public class CreateProfileActivity extends AppCompatActivity {
 
         Map<String, Object> value = new HashMap<>();
         value.put("display_name", dname);
-        value.put("first_name", first);
-        value.put("last_name", last);
 
         mFirebaseRef.child("users/" + uid).updateChildren(value);
         scheduler.post(new AnimateTextRemoveInput("Thanks " + dname + "."));

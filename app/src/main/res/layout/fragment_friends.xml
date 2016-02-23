@@ -1,0 +1,23 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.dehboxturtle.instaclone.FriendsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchField"
+            android:drawableLeft="@drawable/ic_action_search"
+            android:drawablePadding="0dp" android:maxLines="1"
+            />
+    <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/friendList" android:layout_gravity="left|top"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="0dp"
+            android:layout_below="@+id/searchField"/>
+</RelativeLayout>

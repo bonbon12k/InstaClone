@@ -90,9 +90,9 @@ public class NavigationDrawerActivity extends AppCompatActivity
                     .replace(R.id.content_frame, new ProfileFragment())
                     .commit();
         } else if (id == R.id.friends) {
-           /* man.beginTransaction()
+            man.beginTransaction()
                     .replace(R.id.content_frame, new FriendsFragment())
-                    .commit();*/
+                    .commit();
         } else if (id == R.id.messages) {
             /*man.beginTransaction()
                     .replace(R.id.content_frame, new MessagesFragment())
