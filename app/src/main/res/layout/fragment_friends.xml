@@ -13,11 +13,12 @@
             android:drawableLeft="@drawable/ic_action_search"
             android:drawablePadding="0dp" android:maxLines="1"
             />
-    <ListView
+    <android.support.v7.widget.RecyclerView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/friendList" android:layout_gravity="left|top"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="0dp"
-            android:layout_below="@+id/searchField"/>
+            android:layout_below="@+id/searchField" android:clickable="true"
+            android:focusable="true"/>
 </RelativeLayout>
