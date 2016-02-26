@@ -1,6 +1,7 @@
 package com.dehboxturtle.instaclone;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -16,7 +17,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -156,6 +160,7 @@ public class FriendsFragment extends Fragment {
             ImageView avatar;
             TextView name;
             ProgressBar progress;
+            String uid;
 
             public ViewHolder(View view) {
                 super(view);
@@ -169,12 +174,14 @@ public class FriendsFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Clicked " + name.getText().toString(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getContext(), FriendProfile.class);
+                intent.putExtra("uid", uid);
+                startActivity(intent);
             }
         }
 
         public FriendAdapter(ArrayList<Friend> friends) {
-            dataset = (ArrayList<Friend>)friends;
+            dataset = friends;
             Log.i("friendfrag", "Made Friend Adapter");
         }
 
@@ -190,7 +197,7 @@ public class FriendsFragment extends Fragment {
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Friend f = myFriends.get(position);
             holder.name.setText(f.getDisplay_name());
-
+            holder.uid = f.getUid();
             new AsyncTask<ViewHolder, Void, Bitmap>() {
                 private ViewHolder v;
 
@@ -220,7 +227,7 @@ public class FriendsFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return myFriends.size();
+            return dataset.size();
         }
 
         public void setDataset(ArrayList<Friend> data) {
@@ -291,97 +298,4 @@ public class FriendsFragment extends Fragment {
         }
         return filteredModelList;
     }
-
 }
-
- /*   private class FriendFilter extends Filter {
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-            if (constraint == null || constraint.length() == 0) {
-                results.values = allFriends;
-                results.count = allFriends.size();
-            } else {
-                List<Friend> newFriendsList = new ArrayList<>();
-
-                for (Friend f : myFriends) {
-                    if (f.getDisplay_name().toUpperCase().contains(constraint.toString().toUpperCase())) {
-                        newFriendsList.add(f);
-                    }
-                }
-                results.values = newFriendsList;
-                results.count = newFriendsList.size();
-            }
-
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            if (results.count == 0) {
-                mAdapter.notifyDataSetInvalidated();
-            } else {
-                mAdapter.clear();
-                myFriends = (ArrayList<Friend>)results.values;
-                mAdapter.addAll(myFriends);
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-    }*/
-
-
-    /*@Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        final Friend friend = getItem(position);
-        ViewHolder viewHolder;
-
-        if (convertView == null) {
-            viewHolder = new ViewHolder();
-
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.friend_list_item, parent, false);
-
-            viewHolder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
-            viewHolder.name = (TextView) convertView.findViewById(R.id.name);
-            viewHolder.progress = (ProgressBar) convertView.findViewById(R.id.progress);
-            convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) convertView.getTag();
-        }
-
-        viewHolder.name.setText(friend.getDisplay_name());
-        viewHolder.position = position;
-        new AsyncTask<ViewHolder, Void, Bitmap>() {
-            private ViewHolder v;
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                super.onPostExecute(bitmap);
-                if (v.position == position) {
-                    v.progress.setVisibility(View.GONE);
-                    v.avatar.setVisibility(View.VISIBLE);
-                    v.avatar.setImageBitmap(bitmap);
-                }
-            }
-
-            @Override
-            protected Bitmap doInBackground(ViewHolder... params) {
-                v = params[0];
-                String url = friend.getAvatar();
-                Bitmap image = null;
-                try {
-                    InputStream in = new URL(url).openStream();
-                    image = BitmapFactory.decodeStream(in);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return image;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, viewHolder);
-        return convertView;
-    }
-
-    @Override
-    public Filter getFilter() {
-        return new FriendFilter();
-    }*/
