@@ -12,6 +12,8 @@
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+
+        <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://336479535147689:Bu2HE_Z_G1sBnG2-te4dlMI7j1o@dehboxturtle"/>
         <activity
                 android:name=".LoginActivity"
                 android:label="@string/app_name"

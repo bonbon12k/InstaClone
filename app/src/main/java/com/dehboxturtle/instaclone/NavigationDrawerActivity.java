@@ -1,7 +1,6 @@
 package com.dehboxturtle.instaclone;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -14,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 public class NavigationDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -51,11 +49,8 @@ public class NavigationDrawerActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            ImageView imv2 = (ImageView) findViewById(R.id.imageView2);
-            imv2.setImageBitmap(photo);
+            super.onActivityResult(requestCode, resultCode, data);
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -106,10 +101,6 @@ public class NavigationDrawerActivity extends AppCompatActivity
             man.beginTransaction()
                     .replace(R.id.content_frame, new FriendsFragment())
                     .commit();
-        } else if (id == R.id.messages) {
-            /*man.beginTransaction()
-                    .replace(R.id.content_frame, new MessagesFragment())
-                    .commit();*/
         } else if (id == R.id.settings) {
 /*
             man.beginTransaction()
