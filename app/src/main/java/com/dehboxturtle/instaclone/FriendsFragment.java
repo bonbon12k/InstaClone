@@ -164,8 +164,7 @@ public class FriendsFragment extends Fragment {
 
             public ViewHolder(View view) {
                 super(view);
-                view.setClickable(true);
-                view.setFocusable(true);
+
                 avatar = (ImageView) view.findViewById(R.id.avatar);
                 name = (TextView) view.findViewById(R.id.name);
                 progress = (ProgressBar) view.findViewById(R.id.progress);

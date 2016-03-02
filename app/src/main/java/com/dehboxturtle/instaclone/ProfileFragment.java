@@ -1,33 +1,41 @@
 package com.dehboxturtle.instaclone;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.Utils;
 import com.cloudinary.utils.ObjectUtils;
 import com.firebase.client.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ProfileFragment extends Fragment {
 
@@ -39,6 +47,13 @@ public class ProfileFragment extends Fragment {
     MyAdapter mAdapter;
     RecyclerView.LayoutManager mLayoutManager;
     RecyclerView mRecyclerView;
+    private Uri mImageUri;
+    private String mCurrentPhotoPath;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +67,19 @@ public class ProfileFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                verifyStoragePermissions(getActivity());
+                File photo = null;
+                try {
+                    photo = createImageFile();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (photo == null) {
+                    Log.i("file creation", "could not make photo file");
+                }
+                mImageUri = Uri.fromFile(photo);
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
                 startActivityForResult(cameraIntent, 0);
             }
         });
@@ -63,7 +90,8 @@ public class ProfileFragment extends Fragment {
         imageurls = new ArrayList<>();
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.photos);
 
-        mLayoutManager = new StaggeredGridLayoutManager(3, 1);
+        mLayoutManager = new GridLayoutManager(getContext(), 3);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyAdapter(imageurls);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -79,7 +107,8 @@ public class ProfileFragment extends Fragment {
                 Log.i("Load Images", img_url);
                 Log.i("Load Images", dataSnapshot.getKey() + "");
                 imageurls.add(img_url);
-                mAdapter.notifyItemInserted(Integer.parseInt("" + dataSnapshot.getKey()));
+                int i = Integer.parseInt("" + dataSnapshot.getKey());
+                mAdapter.notifyItemInserted(i);
             }
 
             @Override
@@ -106,55 +135,81 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        final Bitmap photo = (Bitmap) data.getExtras().get("data");
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-        final InputStream bs = new ByteArrayInputStream(bitmapdata);
-        ImageView imv2 = (ImageView) getActivity().findViewById(R.id.imageView2);
-        imv2.setImageBitmap(photo);
-        mFirebaseRef.child("users/" + uid + "/image_count").runTransaction(new Transaction.Handler() {
-            long imageindex;
+        Toast.makeText(getContext(), "Processing", Toast.LENGTH_SHORT).show();
+        new AsyncTask<Void, Void, Void>() {
 
             @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                if (mutableData.getValue() == null) {
-                    mutableData.setValue(1);
-                    imageindex = 0;
-                    Log.i("Doing Trans IF", imageindex + "");
-                    return Transaction.success(mutableData);
-                } else {
-                    imageindex = (long) mutableData.getValue();
-                    mutableData.setValue(imageindex + 1);
-                    Log.i("Doing Trans ELSE", imageindex + "");
-                    return Transaction.success(mutableData);
+            protected Void doInBackground(Void... params) {
+                ContentResolver cr = getActivity().getContentResolver();
+                cr.notifyChange(mImageUri, null);
+                Bitmap bitmap = null;
+                Bitmap thumb = null;
+                String filepath = mImageUri.getEncodedPath();
+                try {
+                    thumb = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(filepath), 250, 250);
+                    bitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(filepath), 1920, 1080);
+                    //bitmap = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                thumb.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                byte[] bitmapdata = bos.toByteArray();
+                final InputStream bs = new ByteArrayInputStream(bitmapdata);
 
-            @Override
-            public void onComplete(FirebaseError firebaseError, boolean b, DataSnapshot dataSnapshot) {
-                if (!b) {
-                    firebaseError.toException().printStackTrace();
-                    return;
-                }
-                new AsyncTask<Void, Void, Void>() {
+                ByteArrayOutputStream bosfull = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bosfull);
+                byte[] bitmapdatafull = bosfull.toByteArray();
+                final InputStream bsfull = new ByteArrayInputStream(bitmapdatafull);
+                thumb = null;
+                bitmap = null;
+                mFirebaseRef.child("users/" + uid + "/image_count").runTransaction(new Transaction.Handler() {
+                    long imageindex;
 
                     @Override
-                    protected Void doInBackground(Void... params) {
-                        try {
-                            Log.i("Upload Photo", imageindex + "");
-                            cloudinary.uploader().upload(bs, ObjectUtils.asMap("public_id", uid + "" + imageindex));
-                            String imageurl = cloudinary.url().generate(uid + "" + imageindex);
-                            mPhotosRef.child(imageindex + "").setValue(imageurl);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        if (mutableData.getValue() == null) {
+                            mutableData.setValue(1);
+                            imageindex = 0;
+                            Log.i("Doing Trans IF", imageindex + "");
+                            return Transaction.success(mutableData);
+                        } else {
+                            imageindex = (long) mutableData.getValue();
+                            mutableData.setValue(imageindex + 1);
+                            Log.i("Doing Trans ELSE", imageindex + "");
+                            return Transaction.success(mutableData);
                         }
-                        return null;
                     }
-                }.execute();
+
+                    @Override
+                    public void onComplete(FirebaseError firebaseError, boolean b, DataSnapshot dataSnapshot) {
+                        if (!b) {
+                            firebaseError.toException().printStackTrace();
+                            return;
+                        }
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                try {
+                                    Log.i("Upload Photo", imageindex + "");
+                                    String stamp = System.currentTimeMillis() + "";
+                                    cloudinary.uploader().upload(bs, ObjectUtils.asMap("public_id", uid + "_" + imageindex + "_" + stamp));
+                                    String imageurl = cloudinary.url().generate(uid + "_" + imageindex + "_" + stamp);
+                                    mPhotosRef.child(imageindex + "").setValue(imageurl);
+                                    cloudinary.uploader().upload(bsfull, ObjectUtils.asMap("public_id", uid + "_" + imageindex + "_" + stamp + "_full"));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+
+                                }
+                                return null;
+                            }
+                        }.execute();
+                    }
+                });
+                return null;
             }
-        });
+        }.execute();
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -164,10 +219,27 @@ public class ProfileFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ImVH> {
         private ArrayList<String> mDataset;
 
-        public class ImVH extends RecyclerView.ViewHolder {
+        public class ImVH extends RecyclerView.ViewHolder implements View.OnClickListener {
             public ImageView mImageView;
             public ProgressBar mProgress;
 
@@ -177,6 +249,16 @@ public class ProfileFragment extends Fragment {
                 v.setFocusable(true);
                 mImageView = (ImageView) v.findViewById(R.id.imageView3);
                 mProgress = (ProgressBar) v.findViewById(R.id.progressBar2);
+                v.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                // go fullscreen
+                Intent fullscreen = new Intent(getContext(), FullscreenImageActivity.class);
+                fullscreen.putExtra("position", getAdapterPosition());
+                fullscreen.putExtra("images", mDataset);
+                startActivity(fullscreen);
             }
         }
         public MyAdapter(ArrayList<String> myDataset) {
@@ -188,6 +270,7 @@ public class ProfileFragment extends Fragment {
             View v = LayoutInflater.from(parent.getContext()).
                     inflate(R.layout.image_list_item, parent, false);
             ImVH vh = new ImVH(v);
+            Log.i("CreateVH", "created a view for the list");
             return vh;
         }
 
@@ -223,6 +306,27 @@ public class ProfileFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mDataset.size();
+        }
+    }
+
+    /**
+            * Checks if the app has permission to write to device storage
+    *
+            * If the app does not has permission then the user will be prompted to grant permissions
+    *
+            * @param activity
+    */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
         }
     }
 }
