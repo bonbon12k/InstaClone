@@ -53,7 +53,7 @@ public class FullscreenImageActivity extends AppCompatActivity {
         mPager.setAdapter(mPagerAdapter);
     }
 
-    @Override
+ /*   @Override
     public void onBackPressed() {
         if (mPager.getCurrentItem() == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
@@ -63,7 +63,7 @@ public class FullscreenImageActivity extends AppCompatActivity {
             // Otherwise, select the previous step.
             mPager.setCurrentItem(mPager.getCurrentItem() - 1);
         }
-    }
+    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
