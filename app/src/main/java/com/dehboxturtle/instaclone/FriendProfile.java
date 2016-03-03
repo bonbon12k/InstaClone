@@ -20,6 +20,7 @@ public class FriendProfile extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.INVISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -28,9 +29,16 @@ public class FriendProfile extends AppCompatActivity {
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        android.support.v4.app.FragmentManager man = getSupportFragmentManager();
         uid = getIntent().getStringExtra("uid");
         Log.i("FriendProfile", uid);
+        ProfileFragment frag = new ProfileFragment();
+        Bundle bun = new Bundle();
+        bun.putString("uid", uid + "");
+        frag.setArguments(bun);
+        man.beginTransaction()
+                .replace(R.id.friend_profile_frag, frag)
+                .commit();
     }
 
 }

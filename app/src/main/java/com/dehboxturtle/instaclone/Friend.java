@@ -8,6 +8,7 @@ public class Friend {
     private String display_name;
     private String avatar;
     private String uid;
+    private int image_count;
 
     public Friend() {}
 
@@ -25,5 +26,9 @@ public class Friend {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public int getImage_count() {
+        return image_count;
     }
 }

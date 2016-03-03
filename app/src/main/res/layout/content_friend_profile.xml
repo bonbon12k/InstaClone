@@ -13,4 +13,12 @@
         tools:showIn="@layout/activity_friend_profile"
         tools:context="com.dehboxturtle.instaclone.FriendProfile">
 
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/friend_profile_frag">
+    </FrameLayout>
 </RelativeLayout>

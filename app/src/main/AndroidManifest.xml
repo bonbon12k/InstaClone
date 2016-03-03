@@ -43,7 +43,6 @@
         <activity
                 android:name=".ProfileFragment"
                 android:label="@string/title_activity_profile"
-                android:launchMode="singleTop"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity android:name=".BaseActivity">

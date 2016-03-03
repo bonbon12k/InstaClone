@@ -43,6 +43,7 @@ public class FriendsFragment extends Fragment {
     ArrayList<Friend> myFriends;
     ArrayList<Friend> allFriends;
     RecyclerView.LayoutManager mLayoutMaganager;
+    FloatingActionButton fab;
     public FriendsFragment() {
         // Required empty public constructor
     }
@@ -62,6 +63,10 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        if (fab != null) {
+            fab.setVisibility(View.INVISIBLE);
+        }
         mFirebaseRef = new Firebase(getString(R.string.firebase_root));
 
         myFriends = new ArrayList<>();
@@ -96,14 +101,15 @@ public class FriendsFragment extends Fragment {
             }
         });
 
-        Firebase friendlist = mFirebaseRef.child("userdata/" + mFirebaseRef.getAuth().getUid() + "/friends");
+        final Firebase friendlist = mFirebaseRef.child("userdata/" + mFirebaseRef.getAuth().getUid() + "/friends");
         friendlist.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> uids = dataSnapshot.getChildren();
                 for (DataSnapshot d : uids) {
                     String uid = d.getKey();
-                    mFirebaseRef.child("users/" + uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    Firebase firebaseRoot = new Firebase(getString(R.string.firebase_root));
+                    firebaseRoot.child("users/" + uid).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Friend item = dataSnapshot.getValue(Friend.class);
@@ -135,14 +141,18 @@ public class FriendsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replaced with my own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        Log.i("friendfrag", "OnCreate");
+        if (fab != null) {
+            fab.setVisibility(View.INVISIBLE);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar.make(view, "Replaced with my own action", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+            Log.i("friendfrag", "OnCreate");
+        }
+        mFirebaseRef = new Firebase(getString(R.string.firebase_root));
     }
 
     @Override

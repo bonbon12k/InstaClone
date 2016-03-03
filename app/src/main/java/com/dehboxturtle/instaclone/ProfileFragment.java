@@ -63,7 +63,17 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        mFirebaseRef = new Firebase(getString(R.string.firebase_root));
+        if (getArguments() != null && getArguments().containsKey("uid")) {
+            uid = getArguments().getString("uid");
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            fab.setVisibility(View.VISIBLE);
+            uid = mFirebaseRef.getAuth().getUid();
+        }
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,8 +93,6 @@ public class ProfileFragment extends Fragment {
                 startActivityForResult(cameraIntent, 0);
             }
         });
-        mFirebaseRef = new Firebase(getString(R.string.firebase_root));
-        uid = mFirebaseRef.getAuth().getUid();
         mPhotosRef = mFirebaseRef.child("photos/" + uid);
         cloudinary = new Cloudinary(Utils.cloudinaryUrlFromContext(getContext()));
         imageurls = new ArrayList<>();
@@ -135,6 +143,7 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == 0) return;
         Toast.makeText(getContext(), "Processing", Toast.LENGTH_SHORT).show();
         new AsyncTask<Void, Void, Void>() {
 
@@ -147,7 +156,7 @@ public class ProfileFragment extends Fragment {
                 String filepath = mImageUri.getEncodedPath();
                 try {
                     thumb = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(filepath), 250, 250);
-                    bitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(filepath), 1920, 1080);
+                    bitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(filepath), 1080, 1080);
                     //bitmap = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -256,7 +265,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 // go fullscreen
                 Intent fullscreen = new Intent(getContext(), FullscreenImageActivity.class);
-                fullscreen.putExtra("position", getAdapterPosition());
+                fullscreen.putExtra("position", getLayoutPosition());
                 fullscreen.putExtra("images", mDataset);
                 startActivity(fullscreen);
             }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,6 +17,8 @@ import android.view.View;
 public class NavigationDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    Fragment mContent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +27,7 @@ public class NavigationDrawerActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -39,11 +43,27 @@ public class NavigationDrawerActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, new ProfileFragment())
-                .commit();
+        if (savedInstanceState != null) {
+            //Restore the fragment's instance
+            mContent = getSupportFragmentManager().getFragment(savedInstanceState, "mContent");
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, mContent)
+                    .commit();
+        } else {
+            mContent = new ProfileFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, mContent)
+                    .commit();
+        }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //Save the fragment's instance
+        getSupportFragmentManager().putFragment(outState, "mContent", mContent);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -74,9 +94,6 @@ public class NavigationDrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -90,19 +107,15 @@ public class NavigationDrawerActivity extends AppCompatActivity
 
 
         if (id == R.id.profile) {
+            mContent = new ProfileFragment();
             man.beginTransaction()
-                    .replace(R.id.content_frame, new ProfileFragment())
+                    .replace(R.id.content_frame, mContent)
                     .commit();
         } else if (id == R.id.friends) {
+            mContent = new FriendsFragment();
             man.beginTransaction()
-                    .replace(R.id.content_frame, new FriendsFragment())
+                    .replace(R.id.content_frame, mContent)
                     .commit();
-        } else if (id == R.id.settings) {
-/*
-            man.beginTransaction()
-                    .replace(R.id.content_frame, new SettingsFragment())
-                    .commit();
-*/
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

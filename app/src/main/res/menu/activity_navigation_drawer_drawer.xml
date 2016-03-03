@@ -10,10 +10,7 @@
                 android:id="@+id/friends"
                 android:icon="@drawable/ic_action_group"
                 android:title="Friends"/>
-        <item
-                android:id="@+id/settings"
-                android:icon="@drawable/ic_action_settings"
-                android:title="Settings"/>
+
     </group>
 
 </menu>

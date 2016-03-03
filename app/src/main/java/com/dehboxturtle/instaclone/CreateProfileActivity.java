@@ -85,7 +85,6 @@ public class CreateProfileActivity extends AppCompatActivity {
 
             }
         });
-
         Profile.setVisibility(View.INVISIBLE);
         mInputButton.setVisibility(View.INVISIBLE);
         View.OnFocusChangeListener listen = new LostFocusHandler();
@@ -108,7 +107,8 @@ public class CreateProfileActivity extends AppCompatActivity {
 
         Map<String, Object> value = new HashMap<>();
         value.put("display_name", dname);
-
+        value.put("image_count", 0);
+        value.put("avatar", "http://vignette1.wikia.nocookie.net/fireemblem/images/f/f9/Corrin_Avatar_M%2BF.png/revision/latest/scale-to-width-down/170?cb=20151221003401");
         mFirebaseRef.child("users/" + uid).updateChildren(value);
         scheduler.post(new AnimateTextRemoveInput("Thanks " + dname + "."));
         scheduler.postDelayed(new AnimateText(getString(R.string.have_fun)), 1500);
